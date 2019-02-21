@@ -1,4 +1,5 @@
 (require 'cl-lib)
+(require 'projectile)
 
 (defgroup reorder-python-imports nil
   "Reformat Python code with \"reorder-python-imports\"."
@@ -15,22 +16,23 @@ Send INPUT-BUFFER content to the process stdin.  Saving the
 output to OUTPUT-BUFFER.  Saving process stderr to ERROR-BUFFER.
 Return reorder-python-imports process the exit code."
   (with-current-buffer input-buffer
-    (let ((process (make-process :name "reorder-python-imports"
-                                 :command `(,reorder-python-imports-executable ,@(reorder-python-imports-call-args))
-                                 :buffer output-buffer
-                                 :stderr error-buffer
-                                 :noquery t
-                                 :sentinel (lambda (process event)))))
+    (let ((default-directory (projectile-project-root)))
+      (let ((process (make-process :name "reorder-python-imports"
+                                  :command `(,reorder-python-imports-executable ,@(reorder-python-imports-call-args))
+                                  :buffer output-buffer
+                                  :stderr error-buffer
+                                  :noquery t
+                                  :sentinel (lambda (process event)))))
       (set-process-query-on-exit-flag (get-buffer-process error-buffer) nil)
       (set-process-sentinel (get-buffer-process error-buffer) (lambda (process event)))
       (save-restriction
-        (widen)
-        (process-send-region process (point-min) (point-max)))
+          (widen)
+          (process-send-region process (point-min) (point-max)))
       (process-send-eof process)
       (accept-process-output process nil nil t)
       (while (process-live-p process)
-        (accept-process-output process nil nil t))
-      (process-exit-status process))))
+          (accept-process-output process nil nil t))
+      (process-exit-status process)))))
 
 (defun reorder-python-imports-call-args ()
   "Build reorder-python-imports process call arguments."

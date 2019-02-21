@@ -1,0 +1,17 @@
+* reorder-python-imports.el
+
+With this package, you can call [[https://github.com/asottile/reorder_python_imports][reorder-python-imports]] automatically before saving.
+
+** Installation and usage
+
+Clone this repository somewhere. Then add the following to your emacs config:
+
+#+BEGIN_SRC elisp
+(add-to-list 'load-path "~/.config/emacs-packages/reorder-python-imports.el")
+(require 'reorder-python-imports)
+(add-hook 'python-mode-hook 'reorder-python-imports-mode)
+#+END_SRC
+
+** Credits
+
+I copied almost all the code from proofit404’s [[https://github.com/proofit404/blacken][blacken.el]], so I am forever in debt to him. Cheers!

@@ -45,8 +45,6 @@ Return reorder-python-imports process the exit code."
 Show reorder-python-imports output, if reorder-python-imports exit abnormally and DISPLAY is t."
   (interactive (list t))
   (let* ((original-buffer (current-buffer))
-         (original-point (point))
-         (original-window-pos (window-start))
          (tmpbuf (get-buffer-create "*reorder-python-imports*"))
          (errbuf (get-buffer-create "*reorder-python-imports-error*")))
     ;; This buffer can be left after previous reorder-python-imports invocation.  It
@@ -58,11 +56,7 @@ Show reorder-python-imports output, if reorder-python-imports exit abnormally an
         (if (and (not (zerop (reorder-python-imports-call-bin original-buffer tmpbuf errbuf))) nil)
             (error "Process reorder-python-imports failed, see %s buffer for details" (buffer-name errbuf))
           (unless (or (eq (buffer-size tmpbuf) 0) (eq (compare-buffer-substrings tmpbuf nil nil original-buffer nil nil) 0))
-          ;; (unless (eq (compare-buffer-substrings tmpbuf nil nil original-buffer nil nil) 0)
-            (with-current-buffer tmpbuf
-              (copy-to-buffer original-buffer (point-min) (point-max)))
-            (goto-char original-point)
-            (set-window-start (selected-window) original-window-pos))
+            (with-current-buffer original-buffer (replace-buffer-contents tmpbuf)))
           (mapc 'kill-buffer (list tmpbuf errbuf)))
       (error (message "%s" (error-message-string err))
              (when display

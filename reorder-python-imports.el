@@ -9,6 +9,11 @@
   "Name of the executable to run."
   :type 'string)
 
+(defvar reorder-python-imports-call-args
+  '("-")
+  "Reorder-python-imports process call arguments."
+  )
+
 (defun reorder-python-imports-call-bin (input-buffer output-buffer error-buffer)
   "Call process reorder-python-executable.
 
@@ -18,11 +23,11 @@ Return reorder-python-imports process the exit code."
   (with-current-buffer input-buffer
     (let ((default-directory (projectile-project-root)))
       (let ((process (make-process :name "reorder-python-imports"
-                                  :command `(,reorder-python-imports-executable ,@(reorder-python-imports-call-args))
-                                  :buffer output-buffer
-                                  :stderr error-buffer
-                                  :noquery t
-                                  :sentinel (lambda (process event)))))
+                                   :command `(,reorder-python-imports-executable ,@reorder-python-imports-call-args)
+                                   :buffer output-buffer
+                                   :stderr error-buffer
+                                   :noquery t
+                                   :sentinel (lambda (process event)))))
       (set-process-query-on-exit-flag (get-buffer-process error-buffer) nil)
       (set-process-sentinel (get-buffer-process error-buffer) (lambda (process event)))
       (save-restriction
@@ -33,10 +38,6 @@ Return reorder-python-imports process the exit code."
       (while (process-live-p process)
           (accept-process-output process nil nil t))
       (process-exit-status process)))))
-
-(defun reorder-python-imports-call-args ()
-  "Build reorder-python-imports process call arguments."
-  (append '("/dev/stdin" "--print-only")))
 
 ;;;###autoload
 (defun reorder-python-imports-buffer (&optional display)
